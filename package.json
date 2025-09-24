@@ -6,7 +6,8 @@
   "license": "MIT",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc -p .",
+   "build": "tsc -p tsconfig.build.json",
+    "build:dev": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",
