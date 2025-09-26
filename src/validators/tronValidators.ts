@@ -1,7 +1,14 @@
 import { z } from "zod";
-
+import TronWeb from "tronweb";
+const HEX41 = /^41[a-fA-F0-9]{40}$/;
 export const addressParamSchema = z.object({
-  address: z.string().min(26).max(50),
+  address: z
+    .string()
+    .transform((s) => s.trim())
+    .refine(
+      (s) => TronWeb.isAddress(s) || HEX41.test(s),
+      { message: "Invalid TRON address" }
+    ),
 });
 
 export const trc20BalanceParams = z.object({

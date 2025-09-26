@@ -9,14 +9,41 @@ const required = (name: string, fallback?: string) => {
   return val;
 };
 
+const asBool = (name: string, fallback = false) => {
+  const v = process.env[name];
+  if (v == null) return fallback;
+  return ["1", "true", "yes", "on"].includes(v.toLowerCase());
+};
+
+const asNum = (name: string, fallback: number) => {
+  const s = process.env[name];
+  const n = s ? Number(s) : fallback;
+  return Number.isFinite(n) ? n : fallback;
+};
+
+const asList = (name: string, fallbackCSV: string) => {
+  const csv = process.env[name] ?? fallbackCSV;
+  return csv
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+};
+
 export const config = {
   env: process.env.NODE_ENV ?? "development",
-  port: parseInt(process.env.PORT ?? "5000", 10),
-  corsOrigin: process.env.CORS_ORIGIN ?? "*",
+  port: asNum("PORT", 5000),
+
+  // If you’re behind nginx/proxy in prod, set TRUST_PROXY=1
+  trustProxy: asBool("TRUST_PROXY", false),
+
+  // Comma-separated list, e.g.
+  // CORS_ORIGINS=http://localhost:8080,http://127.0.0.1:8080,https://your-frontend.vercel.app
+  corsOrigins: asList("CORS_ORIGINS", "http://localhost:8080,http://127.0.0.1:8080"),
+
   tron: {
     host: required("TRON_HOST", "https://api.trongrid.io"),
     apiKey: process.env.TRONGRID_API_KEY ?? "",
     senderPrivateKey: process.env.SENDER_PRIVATE_KEY,
-    feeLimitSun: parseInt(process.env.FEE_LIMIT_SUN ?? "10000000", 10),
+    feeLimitSun: asNum("FEE_LIMIT_SUN", 10_000_000),
   },
 };
